@@ -9,11 +9,13 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 
 <!-- Same body shell workspaces/asp.js's render() expects (#opener, #app, #toasts) --
-     structural markup duplication only, not logic; see the plan's decision #5a. -->
+     structural markup duplication only, not logic; see the plan's decision #5a. The opener
+     handler itself no-ops safely if #opener is absent (workspaces/asp.js:4510-4511), so this
+     is free to carry this site's own branding instead of ASP's. -->
 <div id="opener" aria-hidden="true">
   <div class="opener-mark"><i></i><i></i><i></i><i></i><i></i></div>
-  <div class="opener-word">ASP</div>
-  <div class="opener-tag">Artist Management</div>
+  <div class="opener-word">Moshe's Desk</div>
+  <div class="opener-tag">Parent Ops</div>
   <div class="opener-skip">Tap to skip</div>
 </div>
 
