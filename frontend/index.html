@@ -28,6 +28,9 @@
 </div>
 
 <div id="app"></div>
+<!-- VOX mounts here when the switcher picks it; hidden by default, toggled by shell.js.
+     Kept separate from #app so switching never touches ASP's own internal render cycle. -->
+<div id="voxHost" style="display:none;"></div>
 <div class="toast-wrap" id="toasts"></div>
 
 <script src="shell.js"></script>
