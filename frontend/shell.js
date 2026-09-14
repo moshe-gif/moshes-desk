@@ -16,14 +16,14 @@ window.Workspaces = window.Workspaces || {};
 
 const SHELL_SUPABASE_URL = 'https://psgpxbkncuavlnpplykf.supabase.co';
 const SHELL_SUPABASE_KEY = 'sb_publishable_Orec7KI9Lwqd_ZfsKaEq9g__ewGiEiT';
-// Own client instance, not shared with workspaces/asp.js's internal one -- Supabase persists
-// the session in localStorage keyed by project URL, so both clients see the same real session
-// automatically without asp.js needing to expose anything. Keeps the workspace file genuinely
-// self-sufficient (it still needs to run standalone on the plain asp-bookings site, with no
-// shell present at all).
-const shellSupabase = window.supabase
-  ? window.supabase.createClient(SHELL_SUPABASE_URL, SHELL_SUPABASE_KEY)
-  : null;
+// Reuse workspaces/asp.js's own client (it loads before this file -- see index.html's script
+// order) instead of creating a second one against the same project: Supabase's SDK warns that
+// two GoTrueClient instances sharing one storage key "may produce undefined behavior" (caught
+// live via a console warning during verification, 2026-09-14). Falls back to creating our own
+// only if asp.js hasn't registered one for some reason (e.g. script order changes later, or a
+// future workspace doesn't expose one) -- shell.js still works standalone either way.
+const shellSupabase = window.supabaseClient
+  || (window.supabase ? window.supabase.createClient(SHELL_SUPABASE_URL, SHELL_SUPABASE_KEY) : null);
 
 const COMPANY_PREF_KEY = 'moshes_desk_company_pref';
 

@@ -33,6 +33,9 @@
 <div id="voxHost" style="display:none;"></div>
 <div class="toast-wrap" id="toasts"></div>
 
-<script src="shell.js"></script>
+<!-- Order matters: asp.js must load (and register window.supabaseClient) before shell.js runs,
+     so shell.js can reuse that one client instance instead of creating a second one against the
+     same Supabase project -- see shell.js's own comment on why that matters. -->
 <script src="workspaces/vox.js"></script>
 <script src="https://moshe-gif.github.io/asp-bookings/workspaces/asp.js"></script>
+<script src="shell.js"></script>
