@@ -7,9 +7,11 @@
 // company_members/companies (migrations 0004/0005) are genuinely applied now, so the real
 // switcher below is no longer blocked.
 //
-// Demo Mode stays ASP-only by design: it's a client-side-only preview with no real Supabase
-// session, so there's no company_members row to look up -- the switcher simply never appears
-// for a demo login, which is correct (nothing to switch between without a real identity).
+// Demo Mode gets the switcher too (as of 2026-09-14, per Moshe): it's a client-side-only
+// preview with no real Supabase session, so there's no company_members row to look up -- instead
+// a fixed two-option list stands in (ASP + VOX placeholder). Harmless since VOX has no real
+// content to protect yet; this goes away naturally once the real switcher is the only one anyone
+// needs to use day to day.
 "use strict";
 
 window.Workspaces = window.Workspaces || {};
@@ -88,7 +90,7 @@ function shellRenderSwitcher(memberships) {
 async function shellInit() {
   if (!shellSupabase) return;
   const { data: { session } } = await shellSupabase.auth.getSession();
-  if (!session) return; // no real session (yet, or Demo Mode) -- ASP mounts normally, no switcher
+  if (!session) return; // no real session -- Demo Mode is handled separately, see shellWatchDemoMode
   const memberships = await shellLoadMemberships(session.user.id);
   shellRenderSwitcher(memberships);
 }
@@ -99,6 +101,29 @@ if (shellSupabase) {
   });
 }
 shellInit();
+
+// Demo Mode lives entirely inside workspaces/asp.js's own closure (S.user/S.realSession aren't
+// reachable any other way) -- window.S is exposed there for exactly this kind of debug/host
+// access, so a light poll is the simplest reliable way to notice a demo login without asp.js
+// needing to know shell.js exists at all. A real session always sets S.realSession too, so this
+// never fires for one -- shellInit() above already owns that path.
+const DEMO_MEMBERSHIPS = [
+  { companies: { slug: 'asp', name: 'ASP', accent_hex: '#4C6FA5' } },
+  { companies: { slug: 'vox', name: 'The Vox Group', accent_hex: '#64748B' } },
+];
+let shellDemoActive = false;
+setInterval(() => {
+  const s = window.S;
+  const inDemo = !!(s && s.user && !s.realSession);
+  if (inDemo === shellDemoActive) return;
+  shellDemoActive = inDemo;
+  if (inDemo) {
+    shellRenderSwitcher(DEMO_MEMBERSHIPS);
+  } else {
+    document.getElementById('companySwitcher')?.remove();
+    shellShowCompany('asp');
+  }
+}, 400);
 
 // TODO (next): cross-company views (unified digest, unified who-owes-what) living in the shell
 // rather than either workspace; a real nav-integrated switcher placement once a workspace calls
